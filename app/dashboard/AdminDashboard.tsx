@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { UserProfile, Property, Enquiry } from '@/lib/types';
 
 interface AdminDashboardProps {
@@ -119,7 +120,7 @@ export default function AdminDashboard({ profile }: AdminDashboardProps) {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                       {property.interior_images.map((img) => (
                         <div key={img} className="border rounded-lg p-2">
-                          <img src={img} alt="" className="w-full h-24 object-cover rounded" />
+                          <Image src={img} alt="" width={320} height={96} className="w-full h-24 object-cover rounded" />
                           <div className="mt-2 flex items-center justify-between text-xs">
                             <label className="flex items-center space-x-1">
                               <input

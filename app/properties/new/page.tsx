@@ -20,3 +20,5 @@ export default async function NewPropertyPage() {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic'

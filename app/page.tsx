@@ -280,7 +280,7 @@ const companyLogos = [
             {[...companyLogos, ...companyLogos].map((brand, i) => (
               <div key={i} className="flex-shrink-0 mx-8 items-center">
                 <div className="text-2xl flex justify-center font-bold text-gray-700 hover:text-white transition-colors cursor-pointer items-center">
-                  <img width={100} src={brand} alt={brand} className="object-contain" />
+                  <Image width={100} height={40} src={brand} alt={brand} className="object-contain" />
                 </div>
               </div>
             ))}

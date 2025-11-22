@@ -56,3 +56,5 @@ export async function GET(req: Request) {
     updated_at: p.updatedAt?.toISOString() || '',
   })));
 }
+
+export const dynamic = 'force-dynamic'
