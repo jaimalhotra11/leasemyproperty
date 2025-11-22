@@ -31,6 +31,8 @@ export default function Navbar({ isAuthenticated, userRole }: NavbarProps) {
     router.refresh();
   };
 
+  // Clicking the logo should simply navigate home, never log the user out
+
   return (
     <nav className="sticky top-0 z-50 bg-white border-b-2 border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,6 +49,7 @@ export default function Navbar({ isAuthenticated, userRole }: NavbarProps) {
               />
             </div>
             <span className="text-2xl font-bold text-black">LeaseMyProperty</span>
+            <span className='text-sm text-gray-400'>By SK Promoters</span>
           </Link>
 
           {/* Search Bar */}

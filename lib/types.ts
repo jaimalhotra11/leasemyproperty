@@ -35,6 +35,7 @@ export interface Property {
   amenities: string[];
   front_images: string[];
   interior_images: string[];
+  blurred_images?: string[];
   is_approved: boolean;
   created_at: string;
   updated_at: string;

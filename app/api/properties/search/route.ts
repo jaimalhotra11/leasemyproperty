@@ -50,6 +50,7 @@ export async function GET(req: Request) {
     amenities: p.amenities,
     front_images: p.front_images,
     interior_images: p.interior_images,
+    blurred_images: p.blurred_images || [],
     is_approved: p.is_approved,
     created_at: p.createdAt?.toISOString() || '',
     updated_at: p.updatedAt?.toISOString() || '',

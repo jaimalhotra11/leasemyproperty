@@ -23,8 +23,7 @@ export default function PropertyForm({ landlordId }: PropertyFormProps) {
     price_monthly: '',
     legal_requirements: '',
     amenities: '',
-    front_image_urls: '',
-    interior_image_urls: '',
+    images_files: [] as File[],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,15 +40,24 @@ export default function PropertyForm({ landlordId }: PropertyFormProps) {
         .map((a) => a.trim())
         .filter((a) => a);
 
-      const frontImagesArray = formData.front_image_urls
-        .split('\n')
-        .map((url) => url.trim())
-        .filter((url) => url);
+      if (formData.images_files.length < 3) {
+        setError('Please upload at least 3 images (exterior and interior).');
+        setLoading(false);
+        return;
+      }
 
-      const interiorImagesArray = formData.interior_image_urls
-        .split('\n')
-        .map((url) => url.trim())
-        .filter((url) => url);
+      const fd = new FormData();
+      formData.images_files.forEach((f) => fd.append('files', f));
+      fd.append('folder', 'propspace/properties/all');
+      const upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+      if (!upRes.ok) {
+        const data = await upRes.json();
+        setError(data.error || 'Image upload failed');
+        setLoading(false);
+        return;
+      }
+      const upData = await upRes.json();
+      const allImages: string[] = upData.urls;
 
       const res = await fetch('/api/properties', {
         method: 'POST',
@@ -68,8 +76,7 @@ export default function PropertyForm({ landlordId }: PropertyFormProps) {
           price_monthly: parseFloat(formData.price_monthly),
           legal_requirements: formData.legal_requirements || null,
           amenities: amenitiesArray,
-          front_images: frontImagesArray,
-          interior_images: interiorImagesArray,
+          images: allImages,
         }),
       });
 
@@ -298,38 +305,16 @@ export default function PropertyForm({ landlordId }: PropertyFormProps) {
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="front_image_urls" className="block text-sm font-medium text-slate-700 mb-1">
-              Front Images (one URL per line) - Not shown to renters
-            </label>
-            <textarea
-              id="front_image_urls"
-              value={formData.front_image_urls}
-              onChange={(e) => setFormData({ ...formData, front_image_urls: e.target.value })}
-              rows={3}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              placeholder="https://images.pexels.com/..."
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Upload Property Images *</h3>
+            <p className="text-sm text-slate-600 mb-3">Upload a minimum of 3 images including exterior/front, lobby/interior, and any key amenities. Our admin will categorize and blur sensitive images before publishing.</p>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => setFormData({ ...formData, images_files: Array.from(e.target.files || []) })}
+              className="w-full"
             />
-            <p className="mt-1 text-xs text-slate-500">
-              Front images are kept private and not shown to potential renters
-            </p>
-          </div>
-
-          <div className="md:col-span-2">
-            <label htmlFor="interior_image_urls" className="block text-sm font-medium text-slate-700 mb-1">
-              Interior Images (one URL per line) *
-            </label>
-            <textarea
-              id="interior_image_urls"
-              value={formData.interior_image_urls}
-              onChange={(e) => setFormData({ ...formData, interior_image_urls: e.target.value })}
-              required
-              rows={3}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              placeholder="https://images.pexels.com/..."
-            />
-            <p className="mt-1 text-xs text-slate-500">
-              Use Pexels stock photos or your own hosted images
-            </p>
+            <p className="mt-1 text-xs text-slate-500">Accepted formats: JPG, PNG, WebP. Max 5MB per image.</p>
           </div>
         </div>
 

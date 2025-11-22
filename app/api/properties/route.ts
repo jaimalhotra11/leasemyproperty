@@ -40,6 +40,7 @@ export async function GET(req: Request) {
     amenities: p.amenities,
     front_images: p.front_images,
     interior_images: p.interior_images,
+    blurred_images: p.blurred_images || [],
     is_approved: p.is_approved,
     created_at: p.createdAt?.toISOString() || '',
     updated_at: p.updatedAt?.toISOString() || '',
@@ -69,7 +70,8 @@ export async function POST(req: Request) {
     legal_requirements: body.legal_requirements || undefined,
     amenities: body.amenities || [],
     front_images: body.front_images || [],
-    interior_images: body.interior_images || [],
+    interior_images: body.images || body.interior_images || [],
+    blurred_images: [],
     availability_status: 'available',
     is_approved: false,
   });

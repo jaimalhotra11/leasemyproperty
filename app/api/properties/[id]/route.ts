@@ -29,6 +29,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     amenities: p.amenities,
     front_images: p.front_images,
     interior_images: p.interior_images,
+    blurred_images: p.blurred_images || [],
     is_approved: p.is_approved,
     created_at: p.createdAt?.toISOString() || '',
     updated_at: p.updatedAt?.toISOString() || '',
@@ -59,6 +60,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
   if (profile.role === 'admin' && body.availability_status) {
     await Property.updateOne({ _id: params.id }, { $set: { availability_status: body.availability_status } });
+    return NextResponse.json({ ok: true });
+  }
+  if (profile.role === 'admin' && (Array.isArray(body.blurred_images) || Array.isArray(body.front_images))) {
+    const update: any = {};
+    if (Array.isArray(body.blurred_images)) update.blurred_images = body.blurred_images;
+    if (Array.isArray(body.front_images)) update.front_images = body.front_images;
+    await Property.updateOne({ _id: params.id }, { $set: update });
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

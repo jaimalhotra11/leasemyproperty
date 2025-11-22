@@ -80,11 +80,22 @@ export default function HomePage() {
     load();
   }, [userCity]);
 
-  const brands = [
-    'Microsoft', 'Amazon', 'Google', 'Meta', 'Apple', 'Netflix',
-    'Walmart', 'Tesla', 'Samsung', 'IBM', 'Oracle', 'Adobe',
-    'Cisco', 'Intel', 'HP', 'Dell', 'Accenture', 'Deloitte'
-  ];
+const companyLogos = [
+  "/assets/company-logo/amazon.png",
+  "/assets/company-logo/apollo.png",
+  "/assets/company-logo/au.png",
+  "/assets/company-logo/axis.png",
+  "/assets/company-logo/bata.jpg",
+  "/assets/company-logo/dominos.png",
+  "/assets/company-logo/flipkart.png",
+  "/assets/company-logo/hdfc.png",
+  "/assets/company-logo/icici.png",
+  "/assets/company-logo/lenskart.png",
+  "/assets/company-logo/muthoot.svg",
+  "/assets/company-logo/pizza-hut.png",
+  "/assets/company-logo/redtape.png",
+  "/assets/company-logo/unity.svg",
+];
 
   const propertyTypes = [
     { icon: <Building2 />, name: 'Office Space', count: '250+' },
@@ -231,34 +242,45 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {propertyTypes.map((type, i) => (
-              <div key={i} className="group cursor-pointer">
-                <div className="bg-white rounded-2xl p-6 text-center hover:bg-black hover:text-white hover:shadow-xl transition-all hover:-translate-y-2 border-2 border-gray-200">
-                  <div className="w-14 h-14 bg-black group-hover:bg-white rounded-xl flex items-center justify-center mx-auto mb-4 text-white group-hover:text-black group-hover:scale-110 transition-all">
-                    {type.icon}
+            {propertyTypes.map((type, i) => {
+              const mapType: Record<string, string> = {
+                'Office Space': 'office',
+                'Retail': 'retail',
+                'Co-working': 'office',
+                'Warehouse': 'warehouse',
+                'Industrial': 'commercial',
+                'Commercial': 'commercial',
+              };
+              const t = mapType[type.name] || 'commercial';
+              return (
+                <a key={i} href={`/search?type=${encodeURIComponent(t)}&is_approved=true`} className="group cursor-pointer">
+                  <div className="bg-white rounded-2xl p-6 text-center hover:bg-black hover:text-white hover:shadow-xl transition-all hover:-translate-y-2 border-2 border-gray-200">
+                    <div className="w-14 h-14 bg-black group-hover:bg-white rounded-xl flex items-center justify-center mx-auto mb-4 text-white group-hover:text-black group-hover:scale-110 transition-all">
+                      {type.icon}
+                    </div>
+                    <h3 className="font-semibold text-black group-hover:text-white mb-1 text-sm">{type.name}</h3>
+                    <p className="text-xs text-gray-600 group-hover:text-gray-300">{type.count} listings</p>
                   </div>
-                  <h3 className="font-semibold text-black group-hover:text-white mb-1 text-sm">{type.name}</h3>
-                  <p className="text-xs text-gray-600 group-hover:text-gray-300">{type.count} listings</p>
-                </div>
-              </div>
-            ))}
+                </a>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Moving Brands Section - Black & White */}
-      <section className="py-12 bg-black overflow-hidden border-y-2 border-gray-800">
+      <section className="py-12 bg-white overflow-hidden ">
         <div className="mb-6">
           <h3 className="text-center text-sm font-semibold text-gray-400 uppercase tracking-wider">
-            Trusted by 200+ Leading Brands
+            Trusted by 15+ Leading Brands
           </h3>
         </div>
         <div className="relative">
-          <div className="flex animate-scroll">
-            {[...brands, ...brands].map((brand, i) => (
-              <div key={i} className="flex-shrink-0 mx-8">
-                <div className="text-2xl font-bold text-gray-700 hover:text-white transition-colors cursor-pointer">
-                  {brand}
+          <div className="flex animate-scroll items-center ">
+            {[...companyLogos, ...companyLogos].map((brand, i) => (
+              <div key={i} className="flex-shrink-0 mx-8 items-center">
+                <div className="text-2xl flex justify-center font-bold text-gray-700 hover:text-white transition-colors cursor-pointer items-center">
+                  <img width={100} src={brand} alt={brand} className="object-contain" />
                 </div>
               </div>
             ))}
@@ -267,6 +289,7 @@ export default function HomePage() {
       </section>
 
       {/* Local Properties */}
+      {cityProperties.length > 0 && (
       <section id="properties" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
@@ -373,6 +396,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Features - Black & White */}
       <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">

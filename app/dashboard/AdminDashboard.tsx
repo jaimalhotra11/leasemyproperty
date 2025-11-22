@@ -14,6 +14,7 @@ export default function AdminDashboard({ profile }: AdminDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [activeStatus, setActiveStatus] = useState<'all' | 'pending' | 'reviewing' | 'forwarded' | 'closed'>('pending');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [imageFlags, setImageFlags] = useState<Record<string, { blurred: Set<string>; front: Set<string> }>>({});
 
   useEffect(() => {
     fetchData();
@@ -28,12 +29,44 @@ export default function AdminDashboard({ profile }: AdminDashboardProps) {
     if (propertiesRes.ok) {
       const data = await propertiesRes.json();
       setProperties(data);
+      const nextFlags: Record<string, { blurred: Set<string>; front: Set<string> }> = {};
+      data.forEach((p: Property) => {
+        nextFlags[p.id] = {
+          blurred: new Set(p.blurred_images || []),
+          front: new Set(p.front_images || []),
+        };
+      });
+      setImageFlags(nextFlags);
     }
     if (enquiriesRes.ok) {
       const data = await enquiriesRes.json();
       setEnquiries(data as any);
     }
     setLoading(false);
+  };
+
+  const toggleFlag = (pid: string, img: string, type: 'blurred' | 'front') => {
+    setImageFlags((prev) => {
+      const curr = prev[pid] || { blurred: new Set<string>(), front: new Set<string>() };
+      const next = { blurred: new Set(curr.blurred), front: new Set(curr.front) };
+      const set = type === 'blurred' ? next.blurred : next.front;
+      if (set.has(img)) set.delete(img); else set.add(img);
+      return { ...prev, [pid]: next };
+    });
+  };
+
+  const saveImageFlags = async (pid: string) => {
+    const flags = imageFlags[pid];
+    if (!flags) return;
+    const res = await fetch(`/api/properties/${pid}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        blurred_images: Array.from(flags.blurred),
+        front_images: Array.from(flags.front),
+      }),
+    });
+    if (res.ok) fetchData();
   };
 
   const approveProperty = async (propertyId: string) => {
@@ -82,6 +115,33 @@ export default function AdminDashboard({ profile }: AdminDashboardProps) {
                   <p className="text-sm text-slate-600 mb-4">
                     {property.city}, {property.state} | {property.size_sqft.toLocaleString()} sq ft | ₹{property.price_monthly.toLocaleString()}/mo
                   </p>
+                  {property.interior_images && property.interior_images.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                      {property.interior_images.map((img) => (
+                        <div key={img} className="border rounded-lg p-2">
+                          <img src={img} alt="" className="w-full h-24 object-cover rounded" />
+                          <div className="mt-2 flex items-center justify-between text-xs">
+                            <label className="flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                checked={imageFlags[property.id]?.blurred?.has(img) || false}
+                                onChange={() => toggleFlag(property.id, img, 'blurred')}
+                              />
+                              <span>Blur</span>
+                            </label>
+                            <label className="flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                checked={imageFlags[property.id]?.front?.has(img) || false}
+                                onChange={() => toggleFlag(property.id, img, 'front')}
+                              />
+                              <span>Front (hide)</span>
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex space-x-3">
                     <Link
                       href={`/properties/${property.id}`}
@@ -89,6 +149,12 @@ export default function AdminDashboard({ profile }: AdminDashboardProps) {
                     >
                       View Details
                     </Link>
+                    <button
+                      onClick={() => saveImageFlags(property.id)}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+                    >
+                      Save Image Flags
+                    </button>
                     <button
                       onClick={() => approveProperty(property.id)}
                       className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
@@ -155,22 +221,19 @@ export default function AdminDashboard({ profile }: AdminDashboardProps) {
                         Review
                       </button>
                     )}
-                    {(activeStatus === 'pending' || activeStatus === 'reviewing') && (
-                      <button
-                        onClick={() => updateEnquiryStatus(enquiry.id, 'forwarded')}
-                        className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-900 text-white rounded-lg text-xs font-medium transition"
-                      >
-                        Forward
-                      </button>
-                    )}
-                    {(activeStatus !== 'closed') && (
-                      <button
-                        onClick={() => updateEnquiryStatus(enquiry.id, 'closed')}
-                        className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-xs font-medium transition"
-                      >
-                        Close
-                      </button>
-                    )}
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/properties/${enquiry.property_id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ is_approved: true }),
+                        });
+                        fetchData();
+                      }}
+                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition"
+                    >
+                      Approve
+                    </button>
                   </div>
                 </div>
               ))

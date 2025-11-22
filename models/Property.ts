@@ -21,6 +21,7 @@ const PropertySchema = new Schema(
     amenities: { type: [String], default: [] },
     front_images: { type: [String], default: [] },
     interior_images: { type: [String], default: [] },
+    blurred_images: { type: [String], default: [] },
     is_approved: { type: Boolean, default: false },
   },
   { timestamps: true }
