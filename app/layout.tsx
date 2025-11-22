@@ -1,14 +1,14 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'] });
+const roboto = Roboto({ subsets: ['latin'], weight: ['400'] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: {
-    default: 'PropSpace – Commercial Property Leasing in India',
-    template: '%s | PropSpace',
+    default: 'LeaseMyProperty - Commercial Property Leasing in India',
+    template: '%s | LeaseMyProperty',
   },
   description:
     'Find and lease verified commercial properties across India. Browse offices, warehouses, retail spaces, and showrooms with trusted landlords.',
@@ -44,28 +44,28 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    title: 'PropSpace – Commercial Property Leasing in India',
+    title: 'LeaseMyProperty – Commercial Property Leasing in India',
     description:
       'Discover verified offices, warehouses, and retail spaces with transparent leasing and fast approvals.',
     url: '/',
-    siteName: 'PropSpace',
+    siteName: 'LeaseMyProperty',
     images: [
       {
         url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'PropSpace',
+        alt: 'LeaseMyProperty',
       },
     ],
     locale: 'en_IN',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PropSpace – Commercial Property Leasing in India',
+    title: 'LeaseMyProperty – Commercial Property Leasing in India',
     description:
       'Discover verified offices, warehouses, and retail spaces with transparent leasing and fast approvals.',
     images: ['/logo.png'],
-    creator: '@propspace',
+    creator: '@LeaseMyProperty',
   },
   viewport: {
     width: 'device-width',
@@ -82,7 +82,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={roboto.className}>{children}</body>
     </html>
   );
 }
