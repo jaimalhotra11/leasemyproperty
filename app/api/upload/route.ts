@@ -8,6 +8,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+export const runtime = "nodejs";
+
 async function uploadBuffer(buffer: Buffer, folder: string) {
   return new Promise<string>((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
   }
 
   const form = await req.formData();
-  const folder = (form.get('folder') as string) || 'propspace/properties';
+  const folder = (form.get('folder') as string) || 'leasemyproperty/properties';
   const files = form.getAll('files');
   if (!files || files.length === 0) return NextResponse.json({ error: 'No files provided' }, { status: 400 });
 
