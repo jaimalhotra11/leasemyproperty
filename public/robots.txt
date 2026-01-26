@@ -1,0 +1,68 @@
+# LeaseMyProperty Robots.txt
+# https://leasemyproperty.com
+
+User-agent: *
+Allow: /
+
+# Priority pages
+Allow: /about
+Allow: /careers
+Allow: /press
+Allow: /blog
+Allow: /help
+Allow: /terms
+Allow: /privacy
+Allow: /cookies
+Allow: /sitemap
+Allow: /search
+
+# Block admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /_next/
+Disallow: /static/
+
+# Block sensitive files
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /sitemap.xml
+Disallow: /robots.txt
+
+# Allow specific XML files
+Allow: /sitemap.xml
+
+# Sitemap location
+Sitemap: https://leasemyproperty.com/sitemap.xml
+
+# Crawl delay (optional, be respectful)
+Crawl-delay: 1
+
+# Specific instructions for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0.5
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Block unwanted bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /

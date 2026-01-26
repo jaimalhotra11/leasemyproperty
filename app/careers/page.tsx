@@ -2,6 +2,39 @@ import { Building2, Users, Target, Heart, Rocket, Coffee, Shield, TrendingUp } f
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { Metadata } from 'next';
+
+// SEO Metadata for Careers Page
+export const metadata: Metadata = {
+  title: 'Careers at LeaseMyProperty | Job Opportunities in Commercial Real Estate',
+  description: 'Join LeaseMyProperty team! Explore career opportunities in commercial real estate across India. Work with 500+ companies, grow your career in proptech.',
+  keywords: [
+    'careers LeaseMyProperty',
+    'real estate jobs India',
+    'commercial property careers',
+    'proptech jobs',
+    'property management careers',
+    'real estate opportunities',
+    'work in commercial real estate',
+    'property consultant jobs',
+    'real estate company careers',
+    'business development jobs'
+  ],
+  openGraph: {
+    title: 'Careers at LeaseMyProperty | Job Opportunities in Commercial Real Estate',
+    description: 'Join our growing team! Explore exciting career opportunities in India\'s leading commercial real estate platform.',
+    type: 'website',
+    url: 'https://leasemyproperty.com/careers',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Careers at LeaseMyProperty',
+    description: 'Join our growing team! Explore exciting career opportunities in commercial real estate.',
+  },
+  alternates: {
+    canonical: 'https://leasemyproperty.com/careers',
+  },
+};
 
 export default function CareersPage() {
   const openPositions = [

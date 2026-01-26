@@ -8,6 +8,54 @@ import StateDropdownBar from '@/components/StateDropDownBar';
 import type { Property } from '@/lib/types';
 import { Search, MapPin, Building2, ChevronRight, Star, ArrowRight, Mail, Phone, Linkedin, Twitter, Instagram, TrendingUp, Users, Shield, Zap, Award, Clock, DollarSign, Home, Briefcase, Warehouse, Store, Factory, Building } from 'lucide-react';
 import Footer from '@/components/Footer';
+import { Metadata } from 'next';
+
+// SEO Metadata for Homepage
+export const metadata: Metadata = {
+  title: 'LeaseMyProperty - Commercial Property Leasing in India | Office, Warehouse & Retail Spaces',
+  description: 'Find and lease 850+ verified commercial properties across 75+ cities in India. Browse office spaces, warehouses, retail shops, and showrooms with trusted landlords. Fast approvals, transparent pricing, and expert consultation.',
+  keywords: [
+    'commercial property India',
+    'office space for rent',
+    'warehouse lease India', 
+    'retail shop rental',
+    'commercial real estate',
+    'business space lease',
+    'showroom for rent',
+    'co-working space',
+    'industrial property',
+    'office lease Mumbai',
+    'warehouse Delhi',
+    'retail space Bangalore',
+    'commercial property Chennai',
+    'verified properties',
+    'fast approval',
+    'transparent leasing'
+  ],
+  openGraph: {
+    title: 'LeaseMyProperty - Commercial Property Leasing in India',
+    description: '850+ verified commercial properties across 75+ cities. Office spaces, warehouses, retail shops with fast approvals.',
+    type: 'website',
+    url: 'https://leasemyproperty.com',
+    images: [
+      {
+        url: 'https://leasemyproperty.com/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'LeaseMyProperty - Commercial Property Leasing in India',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LeaseMyProperty - Commercial Property Leasing in India',
+    description: '850+ verified commercial properties across 75+ cities. Office spaces, warehouses, retail shops.',
+    images: ['https://leasemyproperty.com/logo.png'],
+  },
+  alternates: {
+    canonical: 'https://leasemyproperty.com',
+  },
+};
 
 export default function HomePage() {
   const [userLocation, setUserLocation] = useState('Jaipur, Rajasthan');
