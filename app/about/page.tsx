@@ -2,39 +2,6 @@ import { Building2, Users, TrendingUp, Award, MapPin, Shield } from 'lucide-reac
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Metadata } from 'next';
-
-// SEO Metadata for About Page
-export const metadata: Metadata = {
-  title: 'About Us - LeaseMyProperty | Leading Commercial Real Estate Platform in India',
-  description: 'Learn about LeaseMyProperty - India\'s trusted commercial real estate platform connecting 500+ businesses with verified properties across 75+ cities. Meet our team and discover our mission.',
-  keywords: [
-    'about LeaseMyProperty',
-    'commercial real estate India',
-    'property leasing platform',
-    'real estate company India',
-    'verified properties',
-    'commercial property experts',
-    'real estate mission',
-    'property management India',
-    'business space solutions',
-    'trusted landlords'
-  ],
-  openGraph: {
-    title: 'About Us - LeaseMyProperty | Leading Commercial Real Estate Platform',
-    description: 'India\'s trusted commercial real estate platform with 850+ verified properties across 75+ cities. Meet our expert team.',
-    type: 'website',
-    url: 'https://leasemyproperty.com/about',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'About Us - LeaseMyProperty',
-    description: 'India\'s trusted commercial real estate platform with 850+ verified properties across 75+ cities.',
-  },
-  alternates: {
-    canonical: 'https://leasemyproperty.com/about',
-  },
-};
 
 export default function AboutPage() {
   return (
