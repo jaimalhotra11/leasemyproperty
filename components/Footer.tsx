@@ -33,20 +33,20 @@ const Footer = () => {
                     <div>
                         <h3 className="font-bold text-lg mb-4">Company</h3>
                         <ul className="space-y-3 text-gray-400">
-                            <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Press</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+                            <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
+                            <li><a href="/careers" className="hover:text-white transition-colors">Careers</a></li>
+                            <li><a href="/press" className="hover:text-white transition-colors">Press</a></li>
+                            <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
                         </ul>
                     </div>
 
                     <div>
                         <h3 className="font-bold text-lg mb-4">Resources</h3>
                         <ul className="space-y-3 text-gray-400">
-                            <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Sitemap</a></li>
+                            <li><a href="/help" className="hover:text-white transition-colors">Help Center</a></li>
+                            <li><a href="/terms" className="hover:text-white transition-colors">Terms of Service</a></li>
+                            <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                            <li><a href="/sitemap" className="hover:text-white transition-colors">Sitemap</a></li>
                         </ul>
                     </div>
 
@@ -75,9 +75,9 @@ const Footer = () => {
                             &copy; 2025 LeaseMyProperty. All rights reserved.
                         </p>
                         <div className="flex items-center space-x-6 text-sm text-gray-400">
-                            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-                            <a href="#" className="hover:text-white transition-colors">Terms</a>
-                            <a href="#" className="hover:text-white transition-colors">Cookies</a>
+                            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+                            <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+                            <a href="/cookies" className="hover:text-white transition-colors">Cookies</a>
                         </div>
                     </div>
                 </div>

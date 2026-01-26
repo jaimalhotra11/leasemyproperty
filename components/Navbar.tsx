@@ -11,7 +11,7 @@ interface NavbarProps {
   userRole?: string;
 }
 
-export default function Navbar({ isAuthenticated, userRole }: NavbarProps) {
+export default function Navbar({ isAuthenticated = false, userRole = 'user' }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);

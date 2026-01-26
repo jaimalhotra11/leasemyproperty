@@ -73,6 +73,11 @@ export default function HomePage() {
         const cprops = (cityRes as Response).ok ? await (cityRes as Response).json() : [];
         setFeaturedProperties(feat as Property[]);
         setCityProperties(cprops as Property[]);
+      } catch (error) {
+        console.error('Failed to load properties:', error);
+        // Set empty arrays as fallback
+        setFeaturedProperties([]);
+        setCityProperties([]);
       } finally {
         setLoadingProps(false);
       }
