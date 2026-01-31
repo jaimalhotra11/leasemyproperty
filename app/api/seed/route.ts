@@ -6,7 +6,13 @@ import bcrypt from 'bcryptjs';
 
 export async function POST() {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) {
+      return NextResponse.json(
+        { error: 'MongoDB connection failed. Please check your MONGODB_URI in .env.local' },
+        { status: 500 }
+      );
+    }
 
     const dummyLandlords = [
       {

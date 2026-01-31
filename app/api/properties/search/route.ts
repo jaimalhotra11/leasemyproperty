@@ -26,10 +26,16 @@ export async function GET(req: Request) {
   }
   if (city) filter.city = { $regex: city, $options: 'i' };
   if (type) filter.property_type = type;
-  if (minSize > 0) filter.size_sqft = { ...(filter.size_sqft || {}), $gte: minSize };
-  if (maxSize > 0) filter.size_sqft = { ...(filter.size_sqft || {}), $lte: maxSize };
-  if (minPrice > 0) filter.price_monthly = { ...(filter.price_monthly || {}), $gte: minPrice };
-  if (maxPrice > 0) filter.price_monthly = { ...(filter.price_monthly || {}), $lte: maxPrice };
+  if (minSize > 0 || maxSize > 0) {
+    filter.size_sqft = {};
+    if (minSize > 0) filter.size_sqft.$gte = minSize;
+    if (maxSize > 0) filter.size_sqft.$lte = maxSize;
+  }
+  if (minPrice > 0 || maxPrice > 0) {
+    filter.price_monthly = {};
+    if (minPrice > 0) filter.price_monthly.$gte = minPrice;
+    if (maxPrice > 0) filter.price_monthly.$lte = maxPrice;
+  }
   if (q) {
     filter.$or = [
       { title: { $regex: q, $options: 'i' } },

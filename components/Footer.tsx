@@ -1,5 +1,6 @@
 "use client"
 import { Building2, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from 'lucide-react'
+import Link from 'next/link'
 import React from 'react'
 
 const Footer = () => {
@@ -43,10 +44,10 @@ const Footer = () => {
                     <div>
                         <h3 className="font-bold text-lg mb-4">Resources</h3>
                         <ul className="space-y-3 text-gray-400">
-                            <li><a href="/help" className="hover:text-white transition-colors">Help Center</a></li>
-                            <li><a href="/terms" className="hover:text-white transition-colors">Terms of Service</a></li>
-                            <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                            <li><a href="/sitemap" className="hover:text-white transition-colors">Sitemap</a></li>
+                            <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+                            <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                            <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link></li>
                         </ul>
                     </div>
 
@@ -75,9 +76,9 @@ const Footer = () => {
                             &copy; 2025 LeaseMyProperty. All rights reserved.
                         </p>
                         <div className="flex items-center space-x-6 text-sm text-gray-400">
-                            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-                            <a href="/terms" className="hover:text-white transition-colors">Terms</a>
-                            <a href="/cookies" className="hover:text-white transition-colors">Cookies</a>
+                            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+                            <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
                         </div>
                     </div>
                 </div>

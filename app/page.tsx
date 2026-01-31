@@ -323,7 +323,7 @@ export default function HomePage() {
               const t = mapType[type.name] || 'commercial';
               const IconComponent = type.IconComponent;
               return (
-                <a key={i} href={`/search?type=${encodeURIComponent(t)}&is_approved=true`} className="group cursor-pointer">
+                <Link key={i} href={`/search?type=${encodeURIComponent(t)}&is_approved=true`} className="group cursor-pointer">
                   <div className="bg-white rounded-2xl p-6 text-center hover:bg-black hover:text-white hover:shadow-xl transition-all hover:-translate-y-2 border-2 border-gray-200">
                     <div className="w-14 h-14 bg-black group-hover:bg-white rounded-xl flex items-center justify-center mx-auto mb-4 text-white group-hover:text-black group-hover:scale-110 transition-all">
                       <IconComponent className="w-6 h-6" />
@@ -331,7 +331,7 @@ export default function HomePage() {
                     <h3 className="font-semibold text-black group-hover:text-white mb-1 text-sm">{type.name}</h3>
                     <p className="text-xs text-gray-600 group-hover:text-gray-300">{type.count} listings</p>
                   </div>
-                </a>
+                </Link>
               );
             })}
           </div>
