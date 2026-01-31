@@ -4,6 +4,9 @@ import { getUserProfile } from '@/lib/auth';
 import PropertyDetailClient from './PropertyDetailClient';
 import EnquiryForm from './EnquiryForm';
 import SocialShare from '@/components/SocialShare';
+import PropertyMap from '@/components/PropertyMap';
+import VirtualTour from '@/components/VirtualTour';
+import PropertyReviews from '@/components/PropertyReviews';
 import { connectDB } from '@/lib/mongoose';
 import { Property } from '@/models/Property';
 import { Types } from 'mongoose';
@@ -44,6 +47,11 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
       front_images: p.front_images,
       interior_images: p.interior_images,
       blurred_images: p.blurred_images || [],
+      virtual_tour_url: p.virtual_tour_url,
+      video_url: p.video_url,
+      is_premium: p.is_premium,
+      is_featured: p.is_featured,
+      view_count: p.view_count || 0,
       is_approved: p.is_approved,
       created_at: p.createdAt?.toISOString() || '',
       updated_at: p.updatedAt?.toISOString() || '',
@@ -58,10 +66,46 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
       <Navbar isAuthenticated={!!profile} userRole={profile?.role} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <PropertyDetailClient property={property} profile={profile} />
+          <div className="lg:col-span-2 space-y-8">
+            <PropertyDetailClient property={property} profile={profile} />
+            
+            {/* Virtual Tour Section */}
+            {(property.virtual_tour_url || property.video_url) && (
+              <VirtualTour
+                virtualTourUrl={property.virtual_tour_url}
+                videoUrl={property.video_url}
+                images={property.interior_images || []}
+              />
+            )}
+
+            {/* Map Section */}
+            {property.latitude && property.longitude && (
+              <PropertyMap
+                latitude={property.latitude}
+                longitude={property.longitude}
+                address={property.address_line1}
+                city={property.city}
+                state={property.state}
+              />
+            )}
+
+            {/* Property Reviews */}
+            <PropertyReviews
+              propertyId={property.id}
+              userRole={profile?.role}
+              userId={profile?.id}
+            />
+
+            {/* Property Comparison Tool - Removed from property detail page as it's a standalone tool */}
+          </div>
+          
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
-              <SocialShare propertyId={property.id} title={property.title} />
+              <SocialShare 
+                propertyId={property.id}
+                title={property.title}
+                description={property.description}
+              />
               {profile && profile.role === 'visitor' && property.is_approved && (
                 <EnquiryForm propertyId={property.id} visitorProfile={profile} />
               )}

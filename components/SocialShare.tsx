@@ -4,15 +4,20 @@ import { Share2, Facebook, Twitter, Linkedin, Mail, Link2, Copy, Check } from 'l
 import { useState } from 'react';
 
 interface SocialShareProps {
-  propertyId: string;
+  propertyId?: string;
   title: string;
   url?: string;
+  description?: string;
 }
 
-export default function SocialShare({ propertyId, title, url }: SocialShareProps) {
+export default function SocialShare({ propertyId, title, url, description }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
-  const shareUrl = url || `${typeof window !== 'undefined' ? window.location.origin : ''}/properties/${propertyId}`;
-  const shareText = `Check out this property: ${title}`;
+  const shareUrl = url || (propertyId ? `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/properties/${propertyId}` : '');
+  const shareText = description || `Check out this property: ${title}`;
+
+  if (!shareUrl) {
+    return null;
+  }
 
   const handleShare = async (platform: string) => {
     const encodedUrl = encodeURIComponent(shareUrl);

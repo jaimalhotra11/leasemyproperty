@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ReferralProgram from '@/components/ReferralProgram';
 import type { UserProfile, Enquiry } from '@/lib/types';
 
 interface VisitorDashboardProps {
@@ -223,6 +224,11 @@ export default function VisitorDashboard({ profile }: VisitorDashboardProps) {
           ))}
         </div>
       )}
+
+      {/* Referral Program Section */}
+      <div className="mt-8">
+        <ReferralProgram />
+      </div>
     </div>
   );
 }

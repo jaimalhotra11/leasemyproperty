@@ -10,6 +10,7 @@ import { Search, MapPin, Building2, ChevronRight, Star, ArrowRight, Mail, Phone,
 import Footer from '@/components/Footer';
 import LiveChat from '@/components/LiveChat';
 import ROICalculator from '@/components/ROICalculator';
+import MarketInsights from '@/components/MarketInsights';
 
 // Constants defined outside component to avoid JSX parsing issues
 const propertyTypesData = [
@@ -749,30 +750,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Market Insights - Black & White */}
+      {/* Market Insights - Dynamic Component */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">Market Insights</h2>
-            <p className="text-lg text-gray-600">Latest trends in commercial real estate</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { title: 'Office Spaces in Demand', desc: 'Tech hubs seeing 35% increase in office space requirements', trend: '+35%' },
-              { title: 'Retail Growth', desc: 'Premium retail locations growing across tier-1 cities', trend: '+28%' },
-              { title: 'Warehouse Expansion', desc: 'E-commerce boom driving warehouse space demand', trend: '+42%' }
-            ].map((insight, i) => (
-              <div key={i} className="bg-black rounded-2xl p-8 text-white hover:scale-105 transition-transform border-2 border-gray-900">
-                <div className="flex items-center justify-between mb-4">
-                  <TrendingUp className="w-8 h-8 text-white" />
-                  <span className="text-3xl font-bold text-white">{insight.trend}</span>
-                </div>
-                <h3 className="text-xl font-bold mb-3">{insight.title}</h3>
-                <p className="text-gray-400">{insight.desc}</p>
-              </div>
-            ))}
-          </div>
+          <MarketInsights />
         </div>
       </section>
 
