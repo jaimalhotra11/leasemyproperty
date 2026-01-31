@@ -35,15 +35,30 @@ export async function POST(req: Request) {
 
   try {
     const urls: string[] = [];
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
     for (const file of files) {
       const blob = file as Blob;
+      
+      // Validate file type
+      if (!allowedTypes.includes(blob.type)) {
+        return NextResponse.json({ error: `Invalid file type: ${blob.type}. Allowed types: ${allowedTypes.join(', ')}` }, { status: 400 });
+      }
+
+      // Validate file size
+      if (blob.size > maxFileSize) {
+        return NextResponse.json({ error: `File size exceeds 5MB limit: ${blob.name}` }, { status: 400 });
+      }
+
       const arrayBuffer = await blob.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const url = await uploadBuffer(buffer, folder);
       urls.push(url);
     }
     return NextResponse.json({ urls });
-  } catch (e) {
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+  } catch (e: any) {
+    console.error('Error uploading files:', e);
+    return NextResponse.json({ error: e.message || 'Upload failed' }, { status: 500 });
   }
 }

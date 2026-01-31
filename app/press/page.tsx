@@ -1,5 +1,6 @@
 import { Newspaper, Calendar, Download, ExternalLink, TrendingUp, Award } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -105,10 +106,11 @@ export default function PressPage() {
             {pressReleases.map((release, index) => (
               <article key={index} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition border border-slate-200">
                 <div className="relative h-48">
-                  <img
+                  <Image
                     src={release.image}
                     alt={release.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">

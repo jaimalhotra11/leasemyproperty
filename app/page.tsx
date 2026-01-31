@@ -8,6 +8,27 @@ import StateDropdownBar from '@/components/StateDropDownBar';
 import type { Property } from '@/lib/types';
 import { Search, MapPin, Building2, ChevronRight, Star, ArrowRight, Mail, Phone, Linkedin, Twitter, Instagram, TrendingUp, Users, Shield, Zap, Award, Clock, DollarSign, Home, Briefcase, Warehouse, Store, Factory, Building } from 'lucide-react';
 import Footer from '@/components/Footer';
+import LiveChat from '@/components/LiveChat';
+import ROICalculator from '@/components/ROICalculator';
+
+// Constants defined outside component to avoid JSX parsing issues
+const propertyTypesData = [
+  { name: 'Office Space', count: '250+' },
+  { name: 'Retail', count: '180+' },
+  { name: 'Co-working', count: '120+' },
+  { name: 'Warehouse', count: '90+' },
+  { name: 'Industrial', count: '75+' },
+  { name: 'Commercial', count: '200+' }
+];
+
+const propertyTypeIcons: Record<string, any> = {
+  'Office Space': Building2,
+  'Retail': Store,
+  'Co-working': Briefcase,
+  'Warehouse': Warehouse,
+  'Industrial': Factory,
+  'Commercial': Home,
+};
 
 export default function HomePage() {
   const [userLocation, setUserLocation] = useState('Jaipur, Rajasthan');
@@ -16,6 +37,8 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cityProperties, setCityProperties] = useState<Property[]>([]);
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
+  const [bestPropertiesNearby, setBestPropertiesNearby] = useState<Property[]>([]);
+  const [recommendedLandlords, setRecommendedLandlords] = useState<any[]>([]);
   const [loadingProps, setLoadingProps] = useState(true);
   const router = useRouter();
 
@@ -65,19 +88,57 @@ export default function HomePage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [featRes, cityRes] = await Promise.all([
+        setLoadingProps(true);
+        // Fetch all data in parallel
+        const promises = [
           fetch('/api/properties?is_approved=true&availability_status=available&limit=6', { cache: 'no-store' }),
-          userCity ? fetch(`/api/properties/search?city=${encodeURIComponent(userCity)}&is_approved=true`, { cache: 'no-store' }) : Promise.resolve({ ok: true, json: async () => [] } as any),
-        ]);
+          fetch('/api/properties?is_approved=true&availability_status=available&limit=6', { cache: 'no-store' }), // For best properties (all cities if no city)
+        ];
+        
+        // Add city-specific queries if city is available
+        if (userCity) {
+          promises.push(
+            fetch(`/api/properties/search?city=${encodeURIComponent(userCity)}&is_approved=true&availability_status=available`, { cache: 'no-store' }),
+            fetch(`/api/properties/search?city=${encodeURIComponent(userCity)}&is_approved=true&availability_status=available&limit=6`, { cache: 'no-store' }),
+            fetch(`/api/landlords/recommended?city=${encodeURIComponent(userCity)}&limit=4`, { cache: 'no-store' })
+          );
+        } else {
+          promises.push(
+            Promise.resolve({ ok: true, json: async () => [] } as any),
+            Promise.resolve({ ok: true, json: async () => [] } as any),
+            fetch('/api/landlords/recommended?limit=4', { cache: 'no-store' }) // Get landlords from all cities if no city
+          );
+        }
+
+        const [featRes, bestAllRes, cityRes, bestCityRes, landlordsRes] = await Promise.all(promises);
+        
         const feat = featRes.ok ? await featRes.json() : [];
+        const bestAll = bestAllRes.ok ? await bestAllRes.json() : [];
         const cprops = (cityRes as Response).ok ? await (cityRes as Response).json() : [];
+        const bestCity = (bestCityRes as Response).ok ? await (bestCityRes as Response).json() : [];
+        const landlords = (landlordsRes as Response).ok ? await (landlordsRes as Response).json() : [];
+        
+        console.log('Data loaded:', {
+          featured: feat.length,
+          bestAll: bestAll.length,
+          cityProps: cprops.length,
+          bestCity: bestCity.length,
+          landlords: Array.isArray(landlords) ? landlords.length : 0,
+          landlordsData: landlords
+        });
+        
         setFeaturedProperties(feat as Property[]);
         setCityProperties(cprops as Property[]);
+        // Use city-specific properties if available, otherwise use all properties
+        setBestPropertiesNearby((bestCity.length > 0 ? bestCity : bestAll) as Property[]);
+        setRecommendedLandlords(Array.isArray(landlords) ? landlords : []);
       } catch (error) {
         console.error('Failed to load properties:', error);
         // Set empty arrays as fallback
         setFeaturedProperties([]);
         setCityProperties([]);
+        setBestPropertiesNearby([]);
+        setRecommendedLandlords([]);
       } finally {
         setLoadingProps(false);
       }
@@ -85,46 +146,45 @@ export default function HomePage() {
     load();
   }, [userCity]);
 
-const companyLogos = [
-  "/assets/company-logo/amazon.png",
-  "/assets/company-logo/apollo.png",
-  "/assets/company-logo/au.png",
-  "/assets/company-logo/axis.png",
-  "/assets/company-logo/bata.jpg",
-  "/assets/company-logo/dominos.png",
-  "/assets/company-logo/flipkart.png",
-  "/assets/company-logo/hdfc.png",
-  "/assets/company-logo/icici.png",
-  "/assets/company-logo/lenskart.png",
-  "/assets/company-logo/muthoot.svg",
-  "/assets/company-logo/pizza-hut.png",
-  "/assets/company-logo/redtape.png",
-  "/assets/company-logo/unity.svg",
-];
-
-  const propertyTypes = [
-    { icon: <Building2 />, name: 'Office Space', count: '250+' },
-    { icon: <Store />, name: 'Retail', count: '180+' },
-    { icon: <Briefcase />, name: 'Co-working', count: '120+' },
-    { icon: <Warehouse />, name: 'Warehouse', count: '90+' },
-    { icon: <Factory />, name: 'Industrial', count: '75+' },
-    { icon: <Home />, name: 'Commercial', count: '200+' }
+  const companyLogos = [
+    "/assets/company-logo/amazon.png",
+    "/assets/company-logo/apollo.png",
+    "/assets/company-logo/au.png",
+    "/assets/company-logo/axis.png",
+    "/assets/company-logo/bata.jpg",
+    "/assets/company-logo/dominos.png",
+    "/assets/company-logo/flipkart.png",
+    "/assets/company-logo/hdfc.png",
+    "/assets/company-logo/icici.png",
+    "/assets/company-logo/lenskart.png",
+    "/assets/company-logo/muthoot.svg",
+    "/assets/company-logo/pizza-hut.png",
+    "/assets/company-logo/redtape.png",
+    "/assets/company-logo/unity.svg",
   ];
 
+  const propertyTypes = propertyTypesData.map(type => {
+    const IconComponent = propertyTypeIcons[type.name] || Building2;
+    return {
+      ...type,
+      IconComponent
+    };
+  });
+
   const stats = [
-    { icon: <Building2 />, value: '850+', label: 'Properties Listed' },
-    { icon: <Users />, value: '500+', label: 'Happy Clients' },
-    { icon: <MapPin />, value: '75+', label: 'Cities Covered' },
-    { icon: <Award />, value: '98%', label: 'Success Rate' }
+    { IconComponent: Building2, value: '850+', label: 'Properties Listed' },
+    { IconComponent: Users, value: '500+', label: 'Happy Clients' },
+    { IconComponent: MapPin, value: '75+', label: 'Cities Covered' },
+    { IconComponent: Award, value: '98%', label: 'Success Rate' }
   ];
 
   const features = [
-    { icon: <Shield />, title: 'Verified Listings', desc: 'Every property is thoroughly verified with legal documentation' },
-    { icon: <Zap />, title: 'Quick Approval', desc: 'Get property approvals within 24-48 hours' },
-    { icon: <Users />, title: 'Expert Consultation', desc: 'Free consultation with our property experts' },
-    { icon: <TrendingUp />, title: 'Market Insights', desc: 'Real-time market analysis and property trends' },
-    { icon: <Clock />, title: '24/7 Support', desc: 'Round-the-clock customer support for all queries' },
-    { icon: <DollarSign />, title: 'Best Pricing', desc: 'Competitive rates with transparent pricing' }
+    { IconComponent: Shield, title: 'Verified Listings', desc: 'Every property is thoroughly verified with legal documentation' },
+    { IconComponent: Zap, title: 'Quick Approval', desc: 'Get property approvals within 24-48 hours' },
+    { IconComponent: Users, title: 'Expert Consultation', desc: 'Free consultation with our property experts' },
+    { IconComponent: TrendingUp, title: 'Market Insights', desc: 'Real-time market analysis and property trends' },
+    { IconComponent: Clock, title: '24/7 Support', desc: 'Round-the-clock customer support for all queries' },
+    { IconComponent: DollarSign, title: 'Best Pricing', desc: 'Competitive rates with transparent pricing' }
   ];
 
   const testimonials = [
@@ -223,17 +283,20 @@ const companyLogos = [
 
           {/* Stats - Black & White */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-5xl mx-auto">
-            {stats.map((stat, i) => (
+            {stats.map((stat, i) => {
+              const IconComponent = stat.IconComponent;
+              return (
               <div key={i} className="text-center p-6 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
                 <div className="flex justify-center mb-3">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white">
-                    {stat.icon}
+                    <IconComponent className="w-6 h-6" />
                   </div>
                 </div>
                 <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -257,11 +320,12 @@ const companyLogos = [
                 'Commercial': 'commercial',
               };
               const t = mapType[type.name] || 'commercial';
+              const IconComponent = type.IconComponent;
               return (
                 <a key={i} href={`/search?type=${encodeURIComponent(t)}&is_approved=true`} className="group cursor-pointer">
                   <div className="bg-white rounded-2xl p-6 text-center hover:bg-black hover:text-white hover:shadow-xl transition-all hover:-translate-y-2 border-2 border-gray-200">
                     <div className="w-14 h-14 bg-black group-hover:bg-white rounded-xl flex items-center justify-center mx-auto mb-4 text-white group-hover:text-black group-hover:scale-110 transition-all">
-                      {type.icon}
+                      <IconComponent className="w-6 h-6" />
                     </div>
                     <h3 className="font-semibold text-black group-hover:text-white mb-1 text-sm">{type.name}</h3>
                     <p className="text-xs text-gray-600 group-hover:text-gray-300">{type.count} listings</p>
@@ -293,6 +357,193 @@ const companyLogos = [
         </div>
       </section>
 
+      {/* Best Properties Near You - Enhanced Section */}
+      <section id="best-properties" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center space-x-3 bg-black text-white px-6 py-3 rounded-full mb-6">
+              <Award className="w-6 h-6" />
+              <span className="font-bold text-lg">Best Properties Near You</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
+              Premium Spaces {userCity ? `in ${userCity}` : 'Available Now'}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Handpicked verified properties {userCity ? 'in your area' : ''} with the best ratings and amenities
+            </p>
+          </div>
+
+          {loadingProps ? (
+            <div className="text-center py-12">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black border-r-transparent"></div>
+              <p className="mt-4 text-gray-600">Loading best properties...</p>
+            </div>
+          ) : bestPropertiesNearby.length > 0 ? (
+            <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {bestPropertiesNearby.slice(0, 6).map((p, i) => (
+              <Link
+                key={p.id}
+                href={`/properties/${p.id}`}
+                className="group bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border-2 border-gray-200 relative"
+              >
+                {/* Badge for top properties */}
+                {i < 3 && (
+                  <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center space-x-1">
+                    <Star className="w-4 h-4 fill-current" />
+                    <span>Top {i + 1}</span>
+                  </div>
+                )}
+                <div className="relative h-64 overflow-hidden bg-gray-100">
+                  <Image src={p.interior_images[0] || 'https://images.pexels.com/photos/271816/pexels-photo-271816.jpeg'} alt={p.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="px-3 py-1.5 bg-black text-white rounded-full text-xs font-bold uppercase tracking-wide">
+                      {p.property_type}
+                    </span>
+                    <div className="flex items-center space-x-1 bg-yellow-50 px-3 py-1 rounded-full">
+                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                      <span className="text-sm font-bold text-gray-900">4.{8 + i}</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-black mb-2 group-hover:text-gray-700 transition-colors line-clamp-1">
+                    {p.title}
+                  </h3>
+                  <div className="flex items-center text-gray-600 text-sm mb-4">
+                    <MapPin className="w-4 h-4 mr-1 text-black" />
+                    <span className="font-medium">{p.city}, {p.state}</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t-2 border-gray-100">
+                    <div>
+                      <div className="text-2xl font-bold text-black">₹{p.price_monthly.toLocaleString()}/mo</div>
+                      <div className="text-xs text-gray-500 font-medium">{p.size_sqft.toLocaleString()} sq ft</div>
+                    </div>
+                    <div className="p-3 bg-black text-white rounded-xl group-hover:bg-gray-900 group-hover:scale-110 transition-all">
+                      <ArrowRight className="w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link href={userCity ? `/search?city=${encodeURIComponent(userCity)}&is_approved=true` : '/search?is_approved=true'} className="inline-flex items-center space-x-2 px-8 py-4 bg-black text-white rounded-xl font-bold hover:bg-gray-900 transition-all hover:shadow-xl hover:scale-105">
+              <span>View All Properties {userCity ? `in ${userCity}` : ''}</span>
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
+            </>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-2xl border-2 border-gray-200">
+              <Building2 className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No properties available yet</h3>
+              <p className="text-gray-600 mb-6">Check back soon for new listings in your area</p>
+              <Link href="/search?is_approved=true" className="inline-flex items-center space-x-2 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-all">
+                <span>Browse All Properties</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Recommended Landlords Section */}
+      <section id="recommended-landlords" className="py-20 px-4 sm:px-6 lg:px-8 bg-black text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-3 rounded-full mb-6">
+              <Users className="w-6 h-6" />
+              <span className="font-bold text-lg">Recommended Landlords</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Trusted Property Owners {userCity ? `in ${userCity}` : ''}
+            </h2>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Verified landlords with multiple properties and excellent track records
+            </p>
+          </div>
+
+          {loadingProps ? (
+            <div className="text-center py-12">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-white border-r-transparent"></div>
+              <p className="mt-4 text-gray-300">Loading recommended landlords...</p>
+            </div>
+          ) : recommendedLandlords.length > 0 ? (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recommendedLandlords.map((landlord, i) => (
+              <div
+                key={landlord.landlord_id}
+                className="group bg-gray-900 rounded-2xl overflow-hidden border-2 border-gray-800 hover:border-white transition-all duration-300 hover:shadow-2xl hover:-translate-y-2"
+              >
+                {landlord.sample_property && (
+                  <div className="relative h-48 overflow-hidden">
+                    <Image
+                      src={landlord.sample_property.interior_images[0] || 'https://images.pexels.com/photos/271816/pexels-photo-271816.jpeg'}
+                      alt={landlord.landlord_name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                        <span className="text-xs font-bold text-white">Verified</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-1 group-hover:text-yellow-400 transition-colors">
+                        {landlord.landlord_name}
+                      </h3>
+                      {landlord.company_name && (
+                        <p className="text-sm text-gray-400">{landlord.company_name}</p>
+                      )}
+                    </div>
+                    <div className="bg-white/10 px-3 py-1.5 rounded-lg">
+                      <div className="text-xs text-gray-400">Properties</div>
+                      <div className="text-lg font-bold text-white">{landlord.property_count}</div>
+                    </div>
+                  </div>
+                  
+                  {landlord.sample_property && (
+                    <div className="mb-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                      <p className="text-xs text-gray-400 mb-1">Sample Property</p>
+                      <p className="text-sm font-medium text-white line-clamp-1">{landlord.sample_property.title}</p>
+                      <p className="text-xs text-gray-400 mt-1">{landlord.sample_property.city}, {landlord.sample_property.state}</p>
+                      <p className="text-sm font-bold text-yellow-400 mt-2">₹{landlord.sample_property.price_monthly.toLocaleString()}/mo</p>
+                    </div>
+                  )}
+
+                  <Link
+                    href={`/search?landlordId=${landlord.landlord_id}&is_approved=true`}
+                    className="block w-full text-center px-4 py-3 bg-white text-black rounded-lg font-bold hover:bg-gray-100 transition-all hover:scale-105"
+                  >
+                    View Properties
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-900 rounded-2xl border-2 border-gray-800">
+              <Users className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+              <h3 className="text-xl font-bold text-white mb-2">No landlords available yet</h3>
+              <p className="text-gray-400 mb-6">Check back soon for verified landlords in your area</p>
+              <Link href="/search?is_approved=true" className="inline-flex items-center space-x-2 px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-100 transition-all">
+                <span>Browse All Properties</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Local Properties */}
       {cityProperties.length > 0 && (
       <section id="properties" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -300,9 +551,9 @@ const companyLogos = [
           <div className="mb-12">
             <div className="flex items-center space-x-2 mb-4">
               <MapPin className="w-6 h-6 text-black" />
-              <h2 className="text-3xl md:text-4xl font-bold text-black">Properties in {userCity}</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-black">More Properties in {userCity}</h2>
             </div>
-            <p className="text-lg text-gray-600">Handpicked properties near you</p>
+            <p className="text-lg text-gray-600">Explore more verified listings in your area</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -394,10 +645,10 @@ const companyLogos = [
           </div>
 
           <div className="text-center mt-12">
-            <button className="px-8 py-4 bg-black text-white rounded-xl font-semibold hover:bg-gray-900 transition-all hover:shadow-xl inline-flex items-center space-x-2">
+            <Link href="/search?is_approved=true" className="px-8 py-4 bg-black text-white rounded-xl font-semibold hover:bg-gray-900 transition-all hover:shadow-xl inline-flex items-center space-x-2">
               <span>View All Properties</span>
               <ChevronRight className="w-5 h-5" />
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -414,18 +665,21 @@ const companyLogos = [
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, i) => (
+            {features.map((feature, i) => {
+              const IconComponent = feature.IconComponent;
+              return (
               <div
                 key={i}
                 className="p-8 bg-white rounded-2xl hover:bg-black hover:text-white hover:shadow-xl transition-all duration-300 border-2 border-gray-200 group"
               >
                 <div className="w-14 h-14 bg-black group-hover:bg-white rounded-xl flex items-center justify-center mb-6 text-white group-hover:text-black group-hover:scale-110 transition-all">
-                  {feature.icon}
+                  <IconComponent className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold text-black group-hover:text-white mb-3">{feature.title}</h3>
                 <p className="text-gray-600 group-hover:text-gray-300">{feature.desc}</p>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -533,14 +787,14 @@ const companyLogos = [
             Join 500+ businesses that found their ideal property with LeaseMyProperty. Start your journey today!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="px-10 py-5 bg-white text-black rounded-xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 inline-flex items-center space-x-2">
+            <Link href="/search?is_approved=true" className="px-10 py-5 bg-white text-black rounded-xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 inline-flex items-center space-x-2">
               <Search className="w-5 h-5" />
               <span>Browse Properties</span>
-            </button>
-            <button className="px-10 py-5 bg-black text-white rounded-xl font-bold text-lg border-2 border-white hover:bg-gray-900 transition-all hover:scale-105 inline-flex items-center space-x-2">
+            </Link>
+            <Link href="/auth/register" className="px-10 py-5 bg-black text-white rounded-xl font-bold text-lg border-2 border-white hover:bg-gray-900 transition-all hover:scale-105 inline-flex items-center space-x-2">
               <Building2 className="w-5 h-5" />
               <span>List Your Property</span>
-            </button>
+            </Link>
           </div>
 
           <div className="mt-12 grid grid-cols-3 gap-8 max-w-3xl mx-auto">
@@ -578,8 +832,26 @@ const companyLogos = [
         </div>
       </section>
 
+      {/* ROI Calculator Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
+              Calculate Your Investment Returns
+            </h2>
+            <p className="text-xl text-gray-600">
+              Make informed decisions with our ROI calculator
+            </p>
+          </div>
+          <ROICalculator />
+        </div>
+      </section>
+
       {/* Footer - Black & White */}
       <Footer />
+
+      {/* Live Chat */}
+      <LiveChat />
 
       <style jsx>{`
         @keyframes scroll {

@@ -5,21 +5,28 @@ import { requireAuth } from '@/lib/auth';
 import { Types } from 'mongoose';
 
 export async function GET(req: Request) {
-  await connectDB();
-  const { searchParams } = new URL(req.url);
-  const limit = parseInt(searchParams.get('limit') || '0');
-  const landlordId = searchParams.get('landlordId');
-  const isApprovedParam = searchParams.get('is_approved');
-  const availability = searchParams.get('availability_status');
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get('limit') || '0');
+    const landlordId = searchParams.get('landlordId');
+    const isApprovedParam = searchParams.get('is_approved');
+    const availability = searchParams.get('availability_status');
 
-  const filter: any = {};
-  if (landlordId) filter.landlordId = new Types.ObjectId(landlordId);
-  if (isApprovedParam !== null) filter.is_approved = isApprovedParam === 'true';
-  if (availability) filter.availability_status = availability;
+    const filter: any = {};
+    if (landlordId) {
+      try {
+        filter.landlordId = new Types.ObjectId(landlordId);
+      } catch {
+        return NextResponse.json({ error: 'Invalid landlord ID' }, { status: 400 });
+      }
+    }
+    if (isApprovedParam !== null) filter.is_approved = isApprovedParam === 'true';
+    if (availability) filter.availability_status = availability;
 
-  const query = Property.find(filter).sort({ createdAt: -1 }).lean();
-  const docs = (limit > 0 ? await query.limit(limit) : await query) as any[];
-  return NextResponse.json(docs.map((p: any) => ({
+    const query = Property.find(filter).sort({ createdAt: -1 }).lean();
+    const docs = (limit > 0 ? await query.limit(limit) : await query) as any[];
+    return NextResponse.json(docs.map((p: any) => ({
     id: p._id.toString(),
     landlord_id: (p.landlordId as Types.ObjectId).toString(),
     title: p.title,
@@ -45,16 +52,27 @@ export async function GET(req: Request) {
     created_at: p.createdAt?.toISOString() || '',
     updated_at: p.updatedAt?.toISOString() || '',
   })));
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
-  await connectDB();
-  const { profile } = await requireAuth();
-  if (!profile || profile.role !== 'landlord') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const body = await req.json();
-  const doc = await Property.create({
+  try {
+    await connectDB();
+    const { profile } = await requireAuth();
+    if (!profile || profile.role !== 'landlord') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const body = await req.json();
+    
+    // Validate required fields
+    if (!body.title || !body.description || !body.property_type || !body.address_line1 || !body.city || !body.state || !body.postal_code || !body.size_sqft || !body.price_monthly) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const doc = await Property.create({
     landlordId: new Types.ObjectId(profile.id),
     title: body.title,
     description: body.description,
@@ -75,5 +93,12 @@ export async function POST(req: Request) {
     availability_status: 'available',
     is_approved: false,
   });
-  return NextResponse.json({ id: doc._id.toString() }, { status: 201 });
+    return NextResponse.json({ id: doc._id.toString() }, { status: 201 });
+  } catch (error: any) {
+    console.error('Error creating property:', error);
+    if (error.name === 'ValidationError') {
+      return NextResponse.json({ error: 'Validation error: ' + Object.values(error.errors).map((e: any) => e.message).join(', ') }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

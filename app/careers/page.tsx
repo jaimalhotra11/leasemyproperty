@@ -1,5 +1,6 @@
 import { Building2, Users, Target, Heart, Rocket, Coffee, Shield, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -213,11 +214,12 @@ export default function CareersPage() {
                 </li>
               </ul>
             </div>
-            <div className="bg-slate-100 rounded-2xl p-8">
-              <img
+            <div className="bg-slate-100 rounded-2xl p-8 relative h-64">
+              <Image
                 src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg"
                 alt="Team collaboration"
-                className="w-full h-64 object-cover rounded-xl"
+                fill
+                className="object-cover rounded-xl"
               />
             </div>
           </div>

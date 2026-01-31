@@ -5,10 +5,14 @@ import { requireAuth } from '@/lib/auth';
 import { Types } from 'mongoose';
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-  await connectDB();
-  const p = await Property.findById(params.id).lean() as any;
-  if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json({
+  try {
+    await connectDB();
+    if (!params.id || !Types.ObjectId.isValid(params.id)) {
+      return NextResponse.json({ error: 'Invalid property ID' }, { status: 400 });
+    }
+    const p = await Property.findById(params.id).lean() as any;
+    if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return NextResponse.json({
     id: p._id.toString(),
     landlord_id: (p.landlordId as Types.ObjectId).toString(),
     title: p.title,
@@ -34,26 +38,42 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     created_at: p.createdAt?.toISOString() || '',
     updated_at: p.updatedAt?.toISOString() || '',
   });
+  } catch (error) {
+    console.error('Error fetching property:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  await connectDB();
-  const { profile } = await requireAuth();
-  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const p = await Property.findById(params.id);
-  if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  const isOwner = p.landlordId.toString() === profile.id;
-  const isAdmin = profile.role === 'admin';
-  if (!isOwner && !isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  await Property.deleteOne({ _id: p._id });
-  return NextResponse.json({ ok: true });
+  try {
+    await connectDB();
+    const { profile } = await requireAuth();
+    if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!params.id || !Types.ObjectId.isValid(params.id)) {
+      return NextResponse.json({ error: 'Invalid property ID' }, { status: 400 });
+    }
+    const p = await Property.findById(params.id);
+    if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    const isOwner = p.landlordId.toString() === profile.id;
+    const isAdmin = profile.role === 'admin';
+    if (!isOwner && !isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    await Property.deleteOne({ _id: p._id });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  await connectDB();
-  const { profile } = await requireAuth();
-  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json();
+  try {
+    await connectDB();
+    const { profile } = await requireAuth();
+    if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!params.id || !Types.ObjectId.isValid(params.id)) {
+      return NextResponse.json({ error: 'Invalid property ID' }, { status: 400 });
+    }
+    const body = await req.json();
   if (profile.role === 'admin' && typeof body.is_approved === 'boolean') {
     await Property.updateOne({ _id: params.id }, { $set: { is_approved: body.is_approved } });
     return NextResponse.json({ ok: true });
@@ -69,5 +89,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     await Property.updateOne({ _id: params.id }, { $set: update });
     return NextResponse.json({ ok: true });
   }
-  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  } catch (error) {
+    console.error('Error updating property:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

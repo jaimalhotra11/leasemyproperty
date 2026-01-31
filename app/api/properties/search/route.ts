@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongoose';
 import { Property } from '@/models/Property';
+import { Types } from 'mongoose';
 
 export async function GET(req: Request) {
-  await connectDB();
-  const { searchParams } = new URL(req.url);
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
   const city = searchParams.get('city') || '';
   const type = searchParams.get('type') || '';
   const minSize = parseInt(searchParams.get('minSize') || '0');
@@ -13,15 +15,21 @@ export async function GET(req: Request) {
   const maxPrice = parseInt(searchParams.get('maxPrice') || '0');
   const q = searchParams.get('q') || '';
   const isApprovedParam = searchParams.get('is_approved');
+  const landlordId = searchParams.get('landlordId');
+  const availability = searchParams.get('availability_status');
 
   const filter: any = {};
   if (isApprovedParam !== null) filter.is_approved = isApprovedParam === 'true';
+  if (availability) filter.availability_status = availability;
+  if (landlordId && Types.ObjectId.isValid(landlordId)) {
+    filter.landlordId = new Types.ObjectId(landlordId);
+  }
   if (city) filter.city = { $regex: city, $options: 'i' };
   if (type) filter.property_type = type;
-  if (minSize) filter.size_sqft = { ...(filter.size_sqft || {}), $gte: minSize };
-  if (maxSize) filter.size_sqft = { ...(filter.size_sqft || {}), $lte: maxSize };
-  if (minPrice) filter.price_monthly = { ...(filter.price_monthly || {}), $gte: minPrice };
-  if (maxPrice) filter.price_monthly = { ...(filter.price_monthly || {}), $lte: maxPrice };
+  if (minSize > 0) filter.size_sqft = { ...(filter.size_sqft || {}), $gte: minSize };
+  if (maxSize > 0) filter.size_sqft = { ...(filter.size_sqft || {}), $lte: maxSize };
+  if (minPrice > 0) filter.price_monthly = { ...(filter.price_monthly || {}), $gte: minPrice };
+  if (maxPrice > 0) filter.price_monthly = { ...(filter.price_monthly || {}), $lte: maxPrice };
   if (q) {
     filter.$or = [
       { title: { $regex: q, $options: 'i' } },
@@ -55,6 +63,10 @@ export async function GET(req: Request) {
     created_at: p.createdAt?.toISOString() || '',
     updated_at: p.updatedAt?.toISOString() || '',
   })));
+  } catch (error) {
+    console.error('Error searching properties:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
 export const dynamic = 'force-dynamic'

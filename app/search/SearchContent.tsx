@@ -29,6 +29,7 @@ export default function SearchContent() {
   const fetchProperties = async () => {
     setLoading(true);
     const params = new URLSearchParams();
+    params.set('is_approved', 'true'); // Only show approved properties
     if (filters.city) params.set('city', filters.city);
     if (filters.type) params.set('type', filters.type);
     if (filters.minSize) params.set('minSize', filters.minSize);

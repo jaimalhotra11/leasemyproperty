@@ -169,7 +169,7 @@ export default function CookiesPage() {
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <h3 className="font-semibold text-black mb-2">Cookie Consent Banner</h3>
                   <p className="text-gray-600">
-                    When you first visit our website, you'll see a cookie consent banner where you can:
+                    When you first visit our website, you&apos;ll see a cookie consent banner where you can:
                   </p>
                   <ul className="list-disc list-inside text-gray-600 mt-3 space-y-1">
                     <li>Accept all cookies</li>
@@ -237,7 +237,7 @@ export default function CookiesPage() {
               </p>
               <ul className="list-disc list-inside text-gray-600 mt-3 space-y-1">
                 <li>Posting the updated policy on our website</li>
-                <li>Updating the "Last updated" date</li>
+                <li>Updating the &quot;Last updated&quot; date</li>
                 <li>Sending email notifications for significant changes</li>
                 <li>Displaying a notice on our website</li>
               </ul>

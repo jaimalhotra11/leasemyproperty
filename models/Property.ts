@@ -23,6 +23,13 @@ const PropertySchema = new Schema(
     interior_images: { type: [String], default: [] },
     blurred_images: { type: [String], default: [] },
     is_approved: { type: Boolean, default: false },
+    is_featured: { type: Boolean, default: false },
+    is_premium: { type: Boolean, default: false },
+    featured_until: { type: Date },
+    views_count: { type: Number, default: 0 },
+    enquiries_count: { type: Number, default: 0 },
+    virtual_tour_url: { type: String },
+    video_url: { type: String },
   },
   { timestamps: true }
 );

@@ -1,5 +1,6 @@
 import { Building2, Users, TrendingUp, Award, MapPin, Shield } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -137,11 +138,12 @@ export default function AboutPage() {
               }
             ].map((member, index) => (
               <div key={index} className="text-center">
-                <div className="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200">
-                  <img
+                <div className="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 relative">
+                  <Image
                     src={member.image}
                     alt={member.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 </div>
                 <h3 className="text-xl font-bold text-black mb-2">{member.name}</h3>
